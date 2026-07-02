@@ -9,13 +9,38 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as DashboardRouteImport } from './routes/dashboard'
+import { Route as MatriculaRouteImport } from './routes/matricula'
+import { Route as GestaoRouteImport } from './routes/gestao'
+import { Route as EntrarRouteImport } from './routes/entrar'
 import { Route as AgendarRouteImport } from './routes/agendar'
+import { Route as DashboardRouteRouteImport } from './routes/dashboard/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as DashboardIndexRouteImport } from './routes/dashboard/index'
+import { Route as DashboardWhatsappRouteImport } from './routes/dashboard/whatsapp'
+import { Route as DashboardRelatoriosRouteImport } from './routes/dashboard/relatorios'
+import { Route as DashboardPresencaRouteImport } from './routes/dashboard/presenca'
+import { Route as DashboardGraduacoesRouteImport } from './routes/dashboard/graduacoes'
+import { Route as DashboardFinanceiroRouteImport } from './routes/dashboard/financeiro'
+import { Route as DashboardEventosRouteImport } from './routes/dashboard/eventos'
+import { Route as DashboardCronogramaRouteImport } from './routes/dashboard/cronograma'
+import { Route as DashboardCrmRouteImport } from './routes/dashboard/crm'
+import { Route as DashboardConfiguracoesRouteImport } from './routes/dashboard/configuracoes'
+import { Route as DashboardBibliotecaRouteImport } from './routes/dashboard/biblioteca'
+import { Route as DashboardAlunosRouteImport } from './routes/dashboard/alunos'
 
-const DashboardRoute = DashboardRouteImport.update({
-  id: '/dashboard',
-  path: '/dashboard',
+const MatriculaRoute = MatriculaRouteImport.update({
+  id: '/matricula',
+  path: '/matricula',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GestaoRoute = GestaoRouteImport.update({
+  id: '/gestao',
+  path: '/gestao',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EntrarRoute = EntrarRouteImport.update({
+  id: '/entrar',
+  path: '/entrar',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AgendarRoute = AgendarRouteImport.update({
@@ -23,49 +48,229 @@ const AgendarRoute = AgendarRouteImport.update({
   path: '/agendar',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardRouteRoute = DashboardRouteRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const DashboardIndexRoute = DashboardIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardWhatsappRoute = DashboardWhatsappRouteImport.update({
+  id: '/whatsapp',
+  path: '/whatsapp',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardRelatoriosRoute = DashboardRelatoriosRouteImport.update({
+  id: '/relatorios',
+  path: '/relatorios',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardPresencaRoute = DashboardPresencaRouteImport.update({
+  id: '/presenca',
+  path: '/presenca',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardGraduacoesRoute = DashboardGraduacoesRouteImport.update({
+  id: '/graduacoes',
+  path: '/graduacoes',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardFinanceiroRoute = DashboardFinanceiroRouteImport.update({
+  id: '/financeiro',
+  path: '/financeiro',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardEventosRoute = DashboardEventosRouteImport.update({
+  id: '/eventos',
+  path: '/eventos',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardCronogramaRoute = DashboardCronogramaRouteImport.update({
+  id: '/cronograma',
+  path: '/cronograma',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardCrmRoute = DashboardCrmRouteImport.update({
+  id: '/crm',
+  path: '/crm',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardConfiguracoesRoute = DashboardConfiguracoesRouteImport.update({
+  id: '/configuracoes',
+  path: '/configuracoes',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardBibliotecaRoute = DashboardBibliotecaRouteImport.update({
+  id: '/biblioteca',
+  path: '/biblioteca',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
+const DashboardAlunosRoute = DashboardAlunosRouteImport.update({
+  id: '/alunos',
+  path: '/alunos',
+  getParentRoute: () => DashboardRouteRoute,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/agendar': typeof AgendarRoute
-  '/dashboard': typeof DashboardRoute
+  '/entrar': typeof EntrarRoute
+  '/gestao': typeof GestaoRoute
+  '/matricula': typeof MatriculaRoute
+  '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/biblioteca': typeof DashboardBibliotecaRoute
+  '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/crm': typeof DashboardCrmRoute
+  '/dashboard/cronograma': typeof DashboardCronogramaRoute
+  '/dashboard/eventos': typeof DashboardEventosRoute
+  '/dashboard/financeiro': typeof DashboardFinanceiroRoute
+  '/dashboard/graduacoes': typeof DashboardGraduacoesRoute
+  '/dashboard/presenca': typeof DashboardPresencaRoute
+  '/dashboard/relatorios': typeof DashboardRelatoriosRoute
+  '/dashboard/whatsapp': typeof DashboardWhatsappRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/agendar': typeof AgendarRoute
-  '/dashboard': typeof DashboardRoute
+  '/entrar': typeof EntrarRoute
+  '/gestao': typeof GestaoRoute
+  '/matricula': typeof MatriculaRoute
+  '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/biblioteca': typeof DashboardBibliotecaRoute
+  '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/crm': typeof DashboardCrmRoute
+  '/dashboard/cronograma': typeof DashboardCronogramaRoute
+  '/dashboard/eventos': typeof DashboardEventosRoute
+  '/dashboard/financeiro': typeof DashboardFinanceiroRoute
+  '/dashboard/graduacoes': typeof DashboardGraduacoesRoute
+  '/dashboard/presenca': typeof DashboardPresencaRoute
+  '/dashboard/relatorios': typeof DashboardRelatoriosRoute
+  '/dashboard/whatsapp': typeof DashboardWhatsappRoute
+  '/dashboard': typeof DashboardIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/dashboard': typeof DashboardRouteRouteWithChildren
   '/agendar': typeof AgendarRoute
-  '/dashboard': typeof DashboardRoute
+  '/entrar': typeof EntrarRoute
+  '/gestao': typeof GestaoRoute
+  '/matricula': typeof MatriculaRoute
+  '/dashboard/alunos': typeof DashboardAlunosRoute
+  '/dashboard/biblioteca': typeof DashboardBibliotecaRoute
+  '/dashboard/configuracoes': typeof DashboardConfiguracoesRoute
+  '/dashboard/crm': typeof DashboardCrmRoute
+  '/dashboard/cronograma': typeof DashboardCronogramaRoute
+  '/dashboard/eventos': typeof DashboardEventosRoute
+  '/dashboard/financeiro': typeof DashboardFinanceiroRoute
+  '/dashboard/graduacoes': typeof DashboardGraduacoesRoute
+  '/dashboard/presenca': typeof DashboardPresencaRoute
+  '/dashboard/relatorios': typeof DashboardRelatoriosRoute
+  '/dashboard/whatsapp': typeof DashboardWhatsappRoute
+  '/dashboard/': typeof DashboardIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/' | '/agendar' | '/dashboard'
+  fullPaths:
+    | '/'
+    | '/dashboard'
+    | '/agendar'
+    | '/entrar'
+    | '/gestao'
+    | '/matricula'
+    | '/dashboard/alunos'
+    | '/dashboard/biblioteca'
+    | '/dashboard/configuracoes'
+    | '/dashboard/crm'
+    | '/dashboard/cronograma'
+    | '/dashboard/eventos'
+    | '/dashboard/financeiro'
+    | '/dashboard/graduacoes'
+    | '/dashboard/presenca'
+    | '/dashboard/relatorios'
+    | '/dashboard/whatsapp'
+    | '/dashboard/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/' | '/agendar' | '/dashboard'
-  id: '__root__' | '/' | '/agendar' | '/dashboard'
+  to:
+    | '/'
+    | '/agendar'
+    | '/entrar'
+    | '/gestao'
+    | '/matricula'
+    | '/dashboard/alunos'
+    | '/dashboard/biblioteca'
+    | '/dashboard/configuracoes'
+    | '/dashboard/crm'
+    | '/dashboard/cronograma'
+    | '/dashboard/eventos'
+    | '/dashboard/financeiro'
+    | '/dashboard/graduacoes'
+    | '/dashboard/presenca'
+    | '/dashboard/relatorios'
+    | '/dashboard/whatsapp'
+    | '/dashboard'
+  id:
+    | '__root__'
+    | '/'
+    | '/dashboard'
+    | '/agendar'
+    | '/entrar'
+    | '/gestao'
+    | '/matricula'
+    | '/dashboard/alunos'
+    | '/dashboard/biblioteca'
+    | '/dashboard/configuracoes'
+    | '/dashboard/crm'
+    | '/dashboard/cronograma'
+    | '/dashboard/eventos'
+    | '/dashboard/financeiro'
+    | '/dashboard/graduacoes'
+    | '/dashboard/presenca'
+    | '/dashboard/relatorios'
+    | '/dashboard/whatsapp'
+    | '/dashboard/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  DashboardRouteRoute: typeof DashboardRouteRouteWithChildren
   AgendarRoute: typeof AgendarRoute
-  DashboardRoute: typeof DashboardRoute
+  EntrarRoute: typeof EntrarRoute
+  GestaoRoute: typeof GestaoRoute
+  MatriculaRoute: typeof MatriculaRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/dashboard': {
-      id: '/dashboard'
-      path: '/dashboard'
-      fullPath: '/dashboard'
-      preLoaderRoute: typeof DashboardRouteImport
+    '/matricula': {
+      id: '/matricula'
+      path: '/matricula'
+      fullPath: '/matricula'
+      preLoaderRoute: typeof MatriculaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/gestao': {
+      id: '/gestao'
+      path: '/gestao'
+      fullPath: '/gestao'
+      preLoaderRoute: typeof GestaoRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/entrar': {
+      id: '/entrar'
+      path: '/entrar'
+      fullPath: '/entrar'
+      preLoaderRoute: typeof EntrarRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/agendar': {
@@ -75,6 +280,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AgendarRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard': {
+      id: '/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof DashboardRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -82,14 +294,145 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/dashboard/': {
+      id: '/dashboard/'
+      path: '/'
+      fullPath: '/dashboard/'
+      preLoaderRoute: typeof DashboardIndexRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/whatsapp': {
+      id: '/dashboard/whatsapp'
+      path: '/whatsapp'
+      fullPath: '/dashboard/whatsapp'
+      preLoaderRoute: typeof DashboardWhatsappRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/relatorios': {
+      id: '/dashboard/relatorios'
+      path: '/relatorios'
+      fullPath: '/dashboard/relatorios'
+      preLoaderRoute: typeof DashboardRelatoriosRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/presenca': {
+      id: '/dashboard/presenca'
+      path: '/presenca'
+      fullPath: '/dashboard/presenca'
+      preLoaderRoute: typeof DashboardPresencaRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/graduacoes': {
+      id: '/dashboard/graduacoes'
+      path: '/graduacoes'
+      fullPath: '/dashboard/graduacoes'
+      preLoaderRoute: typeof DashboardGraduacoesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/financeiro': {
+      id: '/dashboard/financeiro'
+      path: '/financeiro'
+      fullPath: '/dashboard/financeiro'
+      preLoaderRoute: typeof DashboardFinanceiroRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/eventos': {
+      id: '/dashboard/eventos'
+      path: '/eventos'
+      fullPath: '/dashboard/eventos'
+      preLoaderRoute: typeof DashboardEventosRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/cronograma': {
+      id: '/dashboard/cronograma'
+      path: '/cronograma'
+      fullPath: '/dashboard/cronograma'
+      preLoaderRoute: typeof DashboardCronogramaRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/crm': {
+      id: '/dashboard/crm'
+      path: '/crm'
+      fullPath: '/dashboard/crm'
+      preLoaderRoute: typeof DashboardCrmRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/configuracoes': {
+      id: '/dashboard/configuracoes'
+      path: '/configuracoes'
+      fullPath: '/dashboard/configuracoes'
+      preLoaderRoute: typeof DashboardConfiguracoesRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/biblioteca': {
+      id: '/dashboard/biblioteca'
+      path: '/biblioteca'
+      fullPath: '/dashboard/biblioteca'
+      preLoaderRoute: typeof DashboardBibliotecaRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
+    '/dashboard/alunos': {
+      id: '/dashboard/alunos'
+      path: '/alunos'
+      fullPath: '/dashboard/alunos'
+      preLoaderRoute: typeof DashboardAlunosRouteImport
+      parentRoute: typeof DashboardRouteRoute
+    }
   }
 }
 
+interface DashboardRouteRouteChildren {
+  DashboardAlunosRoute: typeof DashboardAlunosRoute
+  DashboardBibliotecaRoute: typeof DashboardBibliotecaRoute
+  DashboardConfiguracoesRoute: typeof DashboardConfiguracoesRoute
+  DashboardCrmRoute: typeof DashboardCrmRoute
+  DashboardCronogramaRoute: typeof DashboardCronogramaRoute
+  DashboardEventosRoute: typeof DashboardEventosRoute
+  DashboardFinanceiroRoute: typeof DashboardFinanceiroRoute
+  DashboardGraduacoesRoute: typeof DashboardGraduacoesRoute
+  DashboardPresencaRoute: typeof DashboardPresencaRoute
+  DashboardRelatoriosRoute: typeof DashboardRelatoriosRoute
+  DashboardWhatsappRoute: typeof DashboardWhatsappRoute
+  DashboardIndexRoute: typeof DashboardIndexRoute
+}
+
+const DashboardRouteRouteChildren: DashboardRouteRouteChildren = {
+  DashboardAlunosRoute: DashboardAlunosRoute,
+  DashboardBibliotecaRoute: DashboardBibliotecaRoute,
+  DashboardConfiguracoesRoute: DashboardConfiguracoesRoute,
+  DashboardCrmRoute: DashboardCrmRoute,
+  DashboardCronogramaRoute: DashboardCronogramaRoute,
+  DashboardEventosRoute: DashboardEventosRoute,
+  DashboardFinanceiroRoute: DashboardFinanceiroRoute,
+  DashboardGraduacoesRoute: DashboardGraduacoesRoute,
+  DashboardPresencaRoute: DashboardPresencaRoute,
+  DashboardRelatoriosRoute: DashboardRelatoriosRoute,
+  DashboardWhatsappRoute: DashboardWhatsappRoute,
+  DashboardIndexRoute: DashboardIndexRoute,
+}
+
+const DashboardRouteRouteWithChildren = DashboardRouteRoute._addFileChildren(
+  DashboardRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  DashboardRouteRoute: DashboardRouteRouteWithChildren,
   AgendarRoute: AgendarRoute,
-  DashboardRoute: DashboardRoute,
+  EntrarRoute: EntrarRoute,
+  GestaoRoute: GestaoRoute,
+  MatriculaRoute: MatriculaRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
+
+import type { getRouter } from './router.tsx'
+import type { startInstance } from './start.ts'
+declare module '@tanstack/react-start' {
+  interface Register {
+    ssr: true
+    router: Awaited<ReturnType<typeof getRouter>>
+    config: Awaited<ReturnType<typeof startInstance.getOptions>>
+  }
+}

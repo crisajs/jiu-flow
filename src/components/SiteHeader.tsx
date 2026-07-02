@@ -14,9 +14,10 @@ export function SiteHeader() {
         </Link>
 
         <nav className="hidden items-center gap-8 text-sm md:flex">
-          <a href="#programa" className="text-muted-foreground transition hover:text-foreground">Programa</a>
+          <a href="#programa" className="text-muted-foreground transition hover:text-foreground">Treinos</a>
           <a href="#metodo" className="text-muted-foreground transition hover:text-foreground">Método</a>
-          <Link to="/dashboard" className="text-muted-foreground transition hover:text-foreground">Plataforma</Link>
+          <a href="#historia" className="text-muted-foreground transition hover:text-foreground">História</a>
+          <Link to="/entrar" className="text-muted-foreground transition hover:text-foreground">Área do Aluno</Link>
         </nav>
 
         <Link

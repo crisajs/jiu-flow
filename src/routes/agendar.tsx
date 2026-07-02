@@ -1,7 +1,21 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { SiteHeader } from "@/components/SiteHeader";
 import { useState } from "react";
-import { ArrowRight, CheckCircle2 } from "lucide-react";
+import { ArrowRight, CheckCircle2, MessageCircle } from "lucide-react";
+import { SCHOOL, SCHEDULE, DAYS } from "@/lib/data";
+
+// Opções derivadas da grade oficial (mantém a aula experimental sempre em sincronia).
+const TURMAS = [...new Set(SCHEDULE.map((s) => s.title))];
+const HORARIOS = [...new Set(SCHEDULE.map((s) => s.start))].sort();
+const fmtHora = (h: string) => h.replace(":", "h");
+
+// Resumo por turma: dias + horários (para o visitante saber quando vir).
+const GRADE_RESUMO = TURMAS.map((title) => {
+  const aulas = SCHEDULE.filter((s) => s.title === title);
+  const dias = [...new Set(aulas.map((s) => s.day))].sort().map((d) => DAYS[d]);
+  const horas = [...new Set(aulas.map((s) => s.start))].sort().map(fmtHora);
+  return { title, dias, horas };
+});
 
 export const Route = createFileRoute("/agendar")({
   head: () => ({
@@ -32,13 +46,40 @@ function Agendar() {
           </p>
 
           <ul className="mt-10 space-y-3 text-sm">
-            {["Kimono e área de troca disponíveis", "Professor faixa-preta acompanha a aula", "Avaliação técnica e física gratuita"].map((t) => (
+            {["Professor faixa-preta multimedalista acompanha a aula", "Avaliação técnica e física gratuita"].map((t) => (
               <li key={t} className="flex items-center gap-3 text-muted-foreground">
                 <CheckCircle2 className="h-4 w-4 text-foreground" />
                 {t}
               </li>
             ))}
           </ul>
+
+          <div className="mt-10 border-t border-border pt-6">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Grade de aulas</div>
+            <ul className="mt-4 space-y-3">
+              {GRADE_RESUMO.map((g) => (
+                <li key={g.title} className="flex flex-col gap-0.5 sm:flex-row sm:items-baseline sm:justify-between">
+                  <span className="text-sm">{g.title}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {g.dias.join(" · ")} — {g.horas.join(" / ")}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <div className="mt-10 border-t border-border pt-6">
+            <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Prefere falar direto?</div>
+            <a
+              href={`https://wa.me/${SCHOOL.phoneDigits}`}
+              target="_blank"
+              rel="noreferrer"
+              className="text-display mt-3 inline-flex items-center gap-2 border border-border px-5 py-3 text-sm transition hover:bg-accent"
+            >
+              <MessageCircle className="h-4 w-4" /> {SCHOOL.phone}
+            </a>
+            <p className="mt-3 text-xs text-muted-foreground">{SCHOOL.address}</p>
+          </div>
         </div>
 
         <div className="border border-border bg-card p-8">
@@ -68,10 +109,10 @@ function Agendar() {
                 <Field label="Idade" name="idade" type="number" />
                 <Select label="Já treinou?" name="experiencia" options={["Nunca", "Sim, branca", "Outra graduação"]} />
               </div>
-              <Select label="Turma" name="turma" options={["Adulto Gi", "Adulto No-Gi", "Infantil", "Feminino", "Competição"]} />
+              <Select label="Turma" name="turma" options={TURMAS} />
               <div className="grid grid-cols-2 gap-4">
                 <Field label="Data" name="data" type="date" />
-                <Select label="Horário" name="horario" options={["07:00", "12:00", "18:00", "19:30", "21:00"]} />
+                <Select label="Horário" name="horario" options={HORARIOS.map(fmtHora)} />
               </div>
 
               <button
