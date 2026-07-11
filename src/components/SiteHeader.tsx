@@ -17,7 +17,7 @@ export function SiteHeader() {
           <a href="#programa" className="text-muted-foreground transition hover:text-foreground">Treinos</a>
           <a href="#metodo" className="text-muted-foreground transition hover:text-foreground">Método</a>
           <a href="#historia" className="text-muted-foreground transition hover:text-foreground">História</a>
-          <Link to="/entrar" className="text-muted-foreground transition hover:text-foreground">Área do Aluno</Link>
+          <a href="#local" className="text-muted-foreground transition hover:text-foreground">Local</a>
         </nav>
 
         <Link

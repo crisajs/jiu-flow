@@ -7,7 +7,7 @@ import { XLogo } from "@/components/XLogo";
 // Login da EQUIPE (Mestre/ADM). Rota oculta e não-linkada — acesso só por URL.
 // Autenticação por e-mail + senha, separada da entrada dos alunos (Google).
 export const Route = createFileRoute("/gestao")({
-  head: () => ({ meta: [{ title: "Gestão — X BJJ School" }] }),
+  head: () => ({ meta: [{ title: "Gestão — X BJJ School" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: Gestao,
 });
 

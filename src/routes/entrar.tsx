@@ -4,7 +4,7 @@ import { useAuth } from "@/lib/auth";
 import { XLogo } from "@/components/XLogo";
 
 export const Route = createFileRoute("/entrar")({
-  head: () => ({ meta: [{ title: "Entrar — X BJJ School" }] }),
+  head: () => ({ meta: [{ title: "Entrar — X BJJ School" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: Entrar,
 });
 

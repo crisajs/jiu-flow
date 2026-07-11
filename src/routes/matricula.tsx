@@ -8,7 +8,7 @@ import { XLogo } from "@/components/XLogo";
 // Tela do "visitante": logou (Google) mas ainda não está vinculado a uma
 // matrícula. Ou reivindica o acesso com o código, ou agenda a aula experimental.
 export const Route = createFileRoute("/matricula")({
-  head: () => ({ meta: [{ title: "Sua matrícula — X BJJ School" }] }),
+  head: () => ({ meta: [{ title: "Sua matrícula — X BJJ School" }, { name: "robots", content: "noindex, nofollow" }] }),
   component: Matricula,
 });
 

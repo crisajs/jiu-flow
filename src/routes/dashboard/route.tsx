@@ -6,6 +6,7 @@ import { useAuth, type Role } from "@/lib/auth";
 import { navForRole, labelFor } from "@/lib/nav";
 
 export const Route = createFileRoute("/dashboard")({
+  head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
   component: DashboardLayout,
 });
 

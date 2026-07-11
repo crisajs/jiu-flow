@@ -57,7 +57,28 @@ const AuthContext = createContext<AuthContextValue | null>(null);
 const DEV_KEY = "jiu-flow-dev-role";
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  return isSupabaseConfigured ? <SupabaseAuth>{children}</SupabaseAuth> : <DevAuth>{children}</DevAuth>;
+  if (isSupabaseConfigured) return <SupabaseAuth>{children}</SupabaseAuth>;
+  // FAIL-CLOSED: em produção sem Supabase, NÃO cai no fallback admin — bloqueia.
+  // O seletor de papel só existe em desenvolvimento (preview local).
+  if (import.meta.env.PROD) return <LockedAuth>{children}</LockedAuth>;
+  return <DevAuth>{children}</DevAuth>;
+}
+
+// Sem backend em produção = sem sessão. Os guards mandam para /entrar.
+function LockedAuth({ children }: { children: ReactNode }) {
+  const value: AuthContextValue = {
+    loading: false,
+    role: null,
+    user: null,
+    isStaff: false,
+    isAdm: false,
+    devMode: false,
+    devSetRole: () => {},
+    signInWithGoogle: async () => {},
+    signInStaff: async () => ({ error: "Autenticação indisponível." }),
+    signOut: async () => {},
+  };
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 // —————————————————— Modo real (Supabase) ——————————————————

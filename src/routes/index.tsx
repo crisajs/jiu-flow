@@ -52,12 +52,12 @@ function Landing() {
                 Aula Experimental Gratuita
                 <ArrowRight className="h-4 w-4 transition group-hover:translate-x-1" />
               </Link>
-              <Link
-                to="/entrar"
+              <a
+                href="#historia"
                 className="text-display inline-flex items-center gap-3 border border-border bg-card px-6 py-4 text-sm transition hover:bg-accent"
               >
-                Área do Aluno
-              </Link>
+                Nossa História
+              </a>
             </div>
           </div>
         </div>

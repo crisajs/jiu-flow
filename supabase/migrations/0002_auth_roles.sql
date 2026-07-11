@@ -71,6 +71,30 @@ create policy profiles_self_update on public.profiles for update to authenticate
 create policy profiles_mestre_manage on public.profiles for all to authenticated
   using (public.is_mestre()) with check (public.is_mestre());
 
+-- BLINDAGEM (defesa contra escalonamento de privilégio):
+-- RLS não filtra por coluna, então este trigger impede que um usuário mude o
+-- próprio `role` ou re-aponte `student_id` via profiles_self_update.
+--   • role só muda pelo Mestre.
+--   • student_id só na 1ª vinculação (NULL→valor, via claim_enrollment) ou pelo Mestre.
+create or replace function public.protect_profile_columns() returns trigger
+  language plpgsql security definer set search_path = public as $$
+begin
+  if new.role is distinct from old.role and not public.is_mestre() then
+    raise exception 'Alteração de papel não permitida';
+  end if;
+  if new.student_id is distinct from old.student_id
+     and old.student_id is not null
+     and not public.is_mestre() then
+    raise exception 'Alteração de matrícula não permitida';
+  end if;
+  return new;
+end $$;
+
+drop trigger if exists protect_profile_columns_trg on public.profiles;
+create trigger protect_profile_columns_trg
+  before update on public.profiles for each row
+  execute function public.protect_profile_columns();
+
 -- —————————————————————— Remove as policies "dev" do 0001 ————————————————————
 do $$
 declare t text;
