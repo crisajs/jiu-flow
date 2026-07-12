@@ -4,6 +4,7 @@ import { Menu, X as XIcon, LogOut } from "lucide-react";
 import { XLogo } from "@/components/XLogo";
 import { useAuth, type Role } from "@/lib/auth";
 import { navForRole, labelFor } from "@/lib/nav";
+import { useRealtimeSync } from "@/lib/db/queries";
 
 export const Route = createFileRoute("/dashboard")({
   head: () => ({ meta: [{ name: "robots", content: "noindex, nofollow" }] }),
@@ -16,6 +17,7 @@ function DashboardLayout() {
   const { loading, user, devMode } = useAuth();
   const navigate = useNavigate();
   const [mobileOpen, setMobileOpen] = useState(false);
+  useRealtimeSync();
 
   // Guards (fora do modo dev):
   //  • sem sessão → entrada do aluno

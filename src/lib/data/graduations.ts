@@ -31,8 +31,8 @@ export type GradRequirement = { label: string; done: boolean };
 
 // Aluno de demonstração = Cristiano Anjos (faixa branca, turma adultos).
 export const MY_GRADUATION = {
-  current: { belt: "branca" as BeltId, stripes: 0 },
-  target: { belt: "branca" as BeltId, stripes: 1, kind: "grau" as const },
+  current: { belt: "branca" as BeltId, stripes: 2 },
+  target: { belt: "branca" as BeltId, stripes: 3, kind: "grau" as const },
   progress: 55,
   classesAttended: 21,
   classesRequired: 40,

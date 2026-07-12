@@ -1,8 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Card, Eyebrow, PageHeader, SectionLabel, BeltTag } from "@/components/dashboard/primitives";
-import { SCHOOL, CURRENT_STUDENT, PROFESSORS } from "@/lib/data";
-import { beltLabel } from "@/lib/belts";
+import { SCHOOL, PROFESSORS, type Student } from "@/lib/data";
+import { beltLabel, nextBelt } from "@/lib/belts";
+import { useMyStudent, useSetMyBelt } from "@/lib/db/queries";
 
 export const Route = createFileRoute("/dashboard/configuracoes")({
   head: () => ({ meta: [{ title: "Configurações — X BJJ School" }] }),
@@ -79,7 +81,18 @@ function AdmConfig() {
 }
 
 function AlunoPerfil() {
-  const s = CURRENT_STUDENT;
+  const { data: s, isLoading } = useMyStudent();
+
+  if (isLoading) return <div className="p-6 text-sm text-muted-foreground">Carregando…</div>;
+  if (!s) {
+    return (
+      <div className="space-y-6 p-4 sm:p-6">
+        <PageHeader eyebrow="MINHA CONTA" title="Meu Perfil" />
+        <Card className="text-center text-sm text-muted-foreground">Matrícula ainda não vinculada. Fale com a recepção.</Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6 p-4 sm:p-6">
       <PageHeader eyebrow="MINHA CONTA" title="Meu Perfil" />
@@ -99,14 +112,58 @@ function AlunoPerfil() {
             <Readonly label="Faixa" value={beltLabel(s.belt, s.stripes)} />
             <Readonly label="WhatsApp" value={s.whatsapp} />
             <Readonly label="Turma" value={s.category} />
-            <Readonly label="Plano" value={s.plan} />
-            <Readonly label="Idade" value={s.age != null ? `${s.age} anos` : "—"} />
           </div>
-          <button className="text-display mt-6 border border-border px-5 py-3 text-xs transition hover:bg-accent">
-            Editar dados
-          </button>
         </Card>
       </div>
+
+      <BeltSelfEditor s={s} />
     </div>
+  );
+}
+
+// Aluno atualiza a própria graduação — só progressão condizente (validado no banco).
+function BeltSelfEditor({ s }: { s: Student }) {
+  const setBelt = useSetMyBelt();
+  const nxt = nextBelt(s.belt);
+  const [stripes, setStripes] = useState(s.stripes);
+
+  return (
+    <Card>
+      <Eyebrow>MINHA GRADUAÇÃO</Eyebrow>
+      <div className="mt-4 flex items-center gap-4">
+        <BeltTag belt={s.belt} stripes={s.stripes} size="lg" showLabel={false} />
+        <span className="text-display text-xl">{beltLabel(s.belt, s.stripes)}</span>
+      </div>
+
+      <div className="mt-6 flex flex-wrap items-end gap-3">
+        <label className="block">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Graus</span>
+          <select value={stripes} onChange={(e) => setStripes(Number(e.target.value))} className="mt-1.5 block border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-foreground">
+            {[0, 1, 2, 3, 4].map((n) => <option key={n} value={n}>{n} grau{n === 1 ? "" : "s"}</option>)}
+          </select>
+        </label>
+        <button
+          onClick={() => setBelt.mutate({ belt: s.belt, stripes })}
+          disabled={setBelt.isPending || stripes === s.stripes}
+          className="text-display bg-primary px-5 py-2.5 text-xs text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
+        >
+          Atualizar graus
+        </button>
+        {nxt ? (
+          <button
+            onClick={() => setBelt.mutate({ belt: nxt.id, stripes: 0 })}
+            disabled={setBelt.isPending}
+            className="text-display border border-border px-5 py-2.5 text-xs transition hover:bg-accent disabled:opacity-50"
+          >
+            Avançar para {nxt.label}
+          </button>
+        ) : null}
+      </div>
+
+      {setBelt.isError ? <div className="mt-3 text-xs text-red-400">{(setBelt.error as Error).message}</div> : null}
+      <p className="mt-3 text-[11px] text-muted-foreground">
+        Só é possível ajustar graus ou avançar para a próxima faixa — nada de pular etapas.
+      </p>
+    </Card>
   );
 }

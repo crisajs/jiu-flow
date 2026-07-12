@@ -3,7 +3,8 @@ import { useState, type ChangeEvent, type FormEvent, type ReactNode } from "reac
 import { CalendarDays, MapPin, Users, Plus, X } from "lucide-react";
 import { useAuth } from "@/lib/auth";
 import { Card, PageHeader, ProgressBar } from "@/components/dashboard/primitives";
-import { EVENTS, type SchoolEvent } from "@/lib/data";
+import { type SchoolEvent } from "@/lib/data";
+import { useEvents, useAddEvent } from "@/lib/db/queries";
 
 export const Route = createFileRoute("/dashboard/eventos")({
   head: () => ({ meta: [{ title: "Eventos — X BJJ School" }] }),
@@ -15,13 +16,12 @@ const EVENT_TYPES: SchoolEvent["type"][] = ["Campeonato", "Seminário", "Gradua�
 function Eventos() {
   const { isStaff } = useAuth();
   const isAdm = isStaff; // mestre e adm podem criar/gerenciar eventos
-  // Eventos vivem em estado local (persistência real chega na Fase B / Supabase).
-  const [events, setEvents] = useState<SchoolEvent[]>(EVENTS);
+  const { data: events = [], isLoading } = useEvents();
+  const add = useAddEvent();
   const [creating, setCreating] = useState(false);
 
-  function addEvent(e: SchoolEvent) {
-    setEvents((prev) => [e, ...prev]);
-    setCreating(false);
+  function addEvent(e: Omit<SchoolEvent, "id" | "registered">) {
+    add.mutate(e, { onSuccess: () => setCreating(false) });
   }
 
   return (
@@ -41,7 +41,9 @@ function Eventos() {
         }
       />
 
-      {events.length === 0 ? (
+      {isLoading ? (
+        <Card className="py-16 text-center text-sm text-muted-foreground">Carregando…</Card>
+      ) : events.length === 0 ? (
         <Card className="py-16 text-center text-sm text-muted-foreground">Nenhum evento agendado.</Card>
       ) : (
         <div className="grid gap-5 md:grid-cols-2">
@@ -51,7 +53,7 @@ function Eventos() {
         </div>
       )}
 
-      {creating ? <CreateEventModal onClose={() => setCreating(false)} onCreate={addEvent} /> : null}
+      {creating ? <CreateEventModal onClose={() => setCreating(false)} onCreate={addEvent} pending={add.isPending} /> : null}
     </div>
   );
 }
@@ -100,7 +102,7 @@ function EventCard({ e, isAdm }: { e: SchoolEvent; isAdm: boolean }) {
   );
 }
 
-function CreateEventModal({ onClose, onCreate }: { onClose: () => void; onCreate: (e: SchoolEvent) => void }) {
+function CreateEventModal({ onClose, onCreate, pending }: { onClose: () => void; onCreate: (e: Omit<SchoolEvent, "id" | "registered">) => void; pending?: boolean }) {
   const [form, setForm] = useState({
     title: "",
     type: "Campeonato" as SchoolEvent["type"],
@@ -117,7 +119,6 @@ function CreateEventModal({ onClose, onCreate }: { onClose: () => void; onCreate
   function submit(ev: FormEvent) {
     ev.preventDefault();
     onCreate({
-      id: `e-${Date.now()}`,
       title: form.title.trim(),
       type: form.type,
       date: form.date,
@@ -125,7 +126,6 @@ function CreateEventModal({ onClose, onCreate }: { onClose: () => void; onCreate
       location: form.location.trim(),
       capacity: form.capacity,
       description: form.description.trim(),
-      registered: 0,
     });
   }
 
@@ -181,8 +181,8 @@ function CreateEventModal({ onClose, onCreate }: { onClose: () => void; onCreate
             <button type="button" onClick={onClose} className="text-display border border-border px-5 py-3 text-xs transition hover:bg-accent">
               Cancelar
             </button>
-            <button type="submit" className="text-display bg-primary px-5 py-3 text-xs text-primary-foreground transition hover:bg-primary/90">
-              Publicar evento
+            <button type="submit" disabled={pending} className="text-display bg-primary px-5 py-3 text-xs text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60">
+              {pending ? "Publicando…" : "Publicar evento"}
             </button>
           </div>
         </form>

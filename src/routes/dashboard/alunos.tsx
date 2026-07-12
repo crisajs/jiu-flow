@@ -1,12 +1,14 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useMemo, useState, type ReactNode } from "react";
-import { Plus, Search } from "lucide-react";
+import { useMemo, useState, type FormEvent, type ReactNode } from "react";
+import { Plus, Search, X } from "lucide-react";
 import { PageHeader, Restricted, BeltTag, StatusBadge } from "@/components/dashboard/primitives";
-import { STUDENTS, type Student } from "@/lib/data";
-import { BELTS, type BeltId } from "@/lib/belts";
+import { type Student } from "@/lib/data";
+import { BELTS, ADULT_ORDER, KID_ORDER, type BeltId } from "@/lib/belts";
+import { useStudents, useAddStudent } from "@/lib/db/queries";
 
 // Ordem de exibição das faixas (adulto + infantil) para os filtros.
 const BELT_ORDER: BeltId[] = ["branca", "cinza", "amarela", "laranja", "verde", "azul", "roxa", "marrom", "preta"];
+const CATEGORIES = ["Adultos", "Juvenil", "Infantil"];
 
 export const Route = createFileRoute("/dashboard/alunos")({
   head: () => ({ meta: [{ title: "Alunos — X BJJ School" }] }),
@@ -18,18 +20,22 @@ export const Route = createFileRoute("/dashboard/alunos")({
 });
 
 function Alunos() {
+  const { data: students = [], isLoading } = useStudents();
   const [q, setQ] = useState("");
   const [belt, setBelt] = useState<BeltId | "todas">("todas");
+  const [adding, setAdding] = useState(false);
 
-  const filtered = useMemo(() => {
-    return STUDENTS.filter((s) => {
-      const matchQ = s.name.toLowerCase().includes(q.toLowerCase());
-      const matchBelt = belt === "todas" || s.belt === belt;
-      return matchQ && matchBelt;
-    });
-  }, [q, belt]);
+  const filtered = useMemo(
+    () =>
+      students.filter((s) => {
+        const matchQ = s.name.toLowerCase().includes(q.toLowerCase());
+        const matchBelt = belt === "todas" || s.belt === belt;
+        return matchQ && matchBelt;
+      }),
+    [students, q, belt],
+  );
 
-  const presentBelts = useMemo(() => BELT_ORDER.filter((b) => STUDENTS.some((s) => s.belt === b)), []);
+  const presentBelts = useMemo(() => BELT_ORDER.filter((b) => students.some((s) => s.belt === b)), [students]);
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -37,7 +43,10 @@ function Alunos() {
         eyebrow="COMUNIDADE"
         title="Alunos"
         actions={
-          <button className="text-display inline-flex items-center gap-2 bg-primary px-4 py-2.5 text-xs text-primary-foreground transition hover:bg-primary/90">
+          <button
+            onClick={() => setAdding(true)}
+            className="text-display inline-flex items-center gap-2 bg-primary px-4 py-2.5 text-xs text-primary-foreground transition hover:bg-primary/90"
+          >
             <Plus className="h-4 w-4" /> Matricular
           </button>
         }
@@ -63,7 +72,9 @@ function Alunos() {
         </div>
       </div>
 
-      <div className="text-xs text-muted-foreground">{filtered.length} alunos</div>
+      <div className="text-xs text-muted-foreground">
+        {isLoading ? "Carregando…" : `${filtered.length} aluno${filtered.length === 1 ? "" : "s"}`}
+      </div>
 
       <div className="overflow-x-auto border border-border">
         <table className="w-full min-w-[640px] text-sm">
@@ -72,21 +83,27 @@ function Alunos() {
               <th className="px-4 py-3 font-normal">Aluno</th>
               <th className="px-4 py-3 font-normal">Faixa</th>
               <th className="px-4 py-3 font-normal">Turma</th>
-              <th className="px-4 py-3 font-normal">Plano</th>
               <th className="px-4 py-3 font-normal">Início</th>
               <th className="px-4 py-3 font-normal">Status</th>
             </tr>
           </thead>
           <tbody>
-            {filtered.slice(0, 40).map((s) => (
+            {filtered.slice(0, 60).map((s) => (
               <Row key={s.id} s={s} />
             ))}
+            {!isLoading && filtered.length === 0 ? (
+              <tr>
+                <td colSpan={5} className="px-4 py-10 text-center text-muted-foreground">Nenhum aluno encontrado.</td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>
-      {filtered.length > 40 ? (
-        <div className="text-center text-xs text-muted-foreground">Mostrando 40 de {filtered.length}</div>
+      {filtered.length > 60 ? (
+        <div className="text-center text-xs text-muted-foreground">Mostrando 60 de {filtered.length}</div>
       ) : null}
+
+      {adding ? <AddStudentModal onClose={() => setAdding(false)} /> : null}
     </div>
   );
 }
@@ -105,10 +122,111 @@ function Row({ s }: { s: Student }) {
       </td>
       <td className="px-4 py-3"><BeltTag belt={s.belt} stripes={s.stripes} /></td>
       <td className="px-4 py-3 text-muted-foreground">{s.category}</td>
-      <td className="px-4 py-3 text-muted-foreground">{s.plan}</td>
       <td className="px-4 py-3 text-muted-foreground">{s.joinedAt ? new Date(s.joinedAt + "T00:00").toLocaleDateString("pt-BR") : "—"}</td>
       <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
     </tr>
+  );
+}
+
+function AddStudentModal({ onClose }: { onClose: () => void }) {
+  const add = useAddStudent();
+  const [form, setForm] = useState({
+    name: "",
+    whatsapp: "",
+    category: "Adultos",
+    belt: "branca" as BeltId,
+    stripes: 0,
+    age: "",
+  });
+
+  const beltOptions = form.category === "Adultos" ? ADULT_ORDER : KID_ORDER;
+
+  function submit(e: FormEvent) {
+    e.preventDefault();
+    add.mutate(
+      {
+        name: form.name,
+        whatsapp: form.whatsapp,
+        age: form.age ? Number(form.age) : null,
+        belt: form.belt,
+        stripes: form.stripes,
+        category: form.category,
+      },
+      { onSuccess: onClose },
+    );
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-start justify-center overflow-auto bg-black/60 p-4 sm:items-center" onClick={onClose}>
+      <div className="w-full max-w-lg border border-border bg-card p-6 sm:p-8" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-start justify-between">
+          <div>
+            <div className="text-[10px] tracking-[0.3em] text-muted-foreground">NOVA MATRÍCULA</div>
+            <h2 className="text-display mt-1 text-2xl">Matricular aluno</h2>
+          </div>
+          <button onClick={onClose} className="text-muted-foreground hover:text-foreground" aria-label="Fechar">
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+
+        <form onSubmit={submit} className="mt-6 space-y-4">
+          <Field label="Nome completo">
+            <input required value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} className={inputCls} />
+          </Field>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="WhatsApp">
+              <input value={form.whatsapp} onChange={(e) => setForm((f) => ({ ...f, whatsapp: e.target.value }))} placeholder="(11) 90000-0000" className={inputCls} />
+            </Field>
+            <Field label="Idade">
+              <input type="number" min={3} max={99} value={form.age} onChange={(e) => setForm((f) => ({ ...f, age: e.target.value }))} className={inputCls} />
+            </Field>
+          </div>
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="Turma">
+              <select
+                value={form.category}
+                onChange={(e) => setForm((f) => ({ ...f, category: e.target.value, belt: e.target.value === "Adultos" ? "branca" : f.belt }))}
+                className={inputCls}
+              >
+                {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+              </select>
+            </Field>
+            <Field label="Graus">
+              <select value={form.stripes} onChange={(e) => setForm((f) => ({ ...f, stripes: Number(e.target.value) }))} className={inputCls}>
+                {[0, 1, 2, 3, 4].map((n) => <option key={n} value={n}>{n} grau{n === 1 ? "" : "s"}</option>)}
+              </select>
+            </Field>
+          </div>
+          <Field label="Faixa">
+            <select value={form.belt} onChange={(e) => setForm((f) => ({ ...f, belt: e.target.value as BeltId }))} className={inputCls}>
+              {beltOptions.map((b) => <option key={b} value={b}>{BELTS[b].label}</option>)}
+            </select>
+          </Field>
+
+          {add.isError ? <div className="text-xs text-red-400">Erro ao salvar. Tente de novo.</div> : null}
+
+          <div className="flex justify-end gap-2 pt-2">
+            <button type="button" onClick={onClose} className="text-display border border-border px-5 py-3 text-xs transition hover:bg-accent">
+              Cancelar
+            </button>
+            <button type="submit" disabled={add.isPending} className="text-display bg-primary px-5 py-3 text-xs text-primary-foreground transition hover:bg-primary/90 disabled:opacity-60">
+              {add.isPending ? "Salvando…" : "Matricular"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+const inputCls = "mt-1.5 w-full border border-border bg-background px-3 py-2.5 text-sm outline-none transition focus:border-foreground";
+
+function Field({ label, children }: { label: string; children: ReactNode }) {
+  return (
+    <label className="block">
+      <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">{label}</span>
+      {children}
+    </label>
   );
 }
 

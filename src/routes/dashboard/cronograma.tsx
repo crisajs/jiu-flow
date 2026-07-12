@@ -1,8 +1,9 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { PageHeader } from "@/components/dashboard/primitives";
-import { scheduleByDay, DAYS, DAYS_FULL, categoryHex, gearLabel, type ClassSession } from "@/lib/data";
+import { DAYS, DAYS_FULL, categoryHex, gearLabel, type ClassSession } from "@/lib/data";
+import { useClasses } from "@/lib/db/queries";
 
 export const Route = createFileRoute("/dashboard/cronograma")({
   head: () => ({ meta: [{ title: "Cronograma — X BJJ School" }] }),
@@ -11,7 +12,11 @@ export const Route = createFileRoute("/dashboard/cronograma")({
 
 function Cronograma() {
   const { isStaff } = useAuth();
-  const byDay = scheduleByDay();
+  const { data: classes = [], isLoading } = useClasses();
+  const byDay = useMemo(
+    () => DAYS.map((_, day) => classes.filter((c) => c.day === day).sort((a, b) => a.start.localeCompare(b.start))),
+    [classes],
+  );
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
@@ -36,6 +41,12 @@ function Cronograma() {
           </span>
         ))}
       </div>
+
+      {isLoading ? (
+        <div className="py-16 text-center text-sm text-muted-foreground">Carregando aulas…</div>
+      ) : classes.length === 0 ? (
+        <div className="border border-border bg-card py-16 text-center text-sm text-muted-foreground">Nenhuma aula cadastrada ainda.</div>
+      ) : null}
 
       <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-3">
         {DAYS.map((_, day) => {

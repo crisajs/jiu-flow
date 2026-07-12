@@ -78,25 +78,27 @@ export function BeltTag({
   size?: "sm" | "md" | "lg";
 }) {
   const b = BELTS[belt];
-  const rankBg = belt === "preta" ? "bg-red-700" : "bg-neutral-900";
-  const dims = size === "lg" ? "h-5 w-20" : size === "sm" ? "h-3 w-12" : "h-4 w-16";
-  const stripeH = size === "lg" ? "h-3.5" : size === "sm" ? "h-2" : "h-2.5";
+  const isBlack = belt === "preta";
+  const rankBg = isBlack ? "bg-red-700" : "bg-neutral-950";
+  const dims = size === "lg" ? "h-6 w-24" : size === "sm" ? "h-3.5 w-14" : "h-5 w-[4.75rem]";
+  const n = Math.min(4, stripes);
 
   return (
-    <span className="inline-flex items-center gap-2">
+    <span className="inline-flex items-center gap-2.5">
       <span
-        className={`relative flex shrink-0 justify-end overflow-hidden rounded-[2px] border border-black/30 shadow-sm ${dims} ${b.bg}`}
+        className={`relative flex shrink-0 items-center overflow-hidden rounded-full ring-1 ring-black/25 ${dims} ${b.bg}`}
+        style={{ boxShadow: "inset 0 1.5px 0 rgba(255,255,255,0.28), inset 0 -2px 3px rgba(0,0,0,0.28)" }}
         title={beltLabel(belt, stripes)}
         aria-label={beltLabel(belt, stripes)}
       >
-        {/* ponteira (rank bar) com os graus */}
-        <span className={`flex w-2/5 items-center justify-center gap-[2px] ${rankBg}`}>
-          {Array.from({ length: Math.min(4, stripes) }).map((_, i) => (
-            <span key={i} className={`${stripeH} w-[2px] rounded-[1px] bg-white`} />
+        {/* ponteira (rank bar) com os graus — posicionada como numa faixa real */}
+        <span className={`absolute inset-y-0 right-[13%] flex w-[34%] items-center justify-evenly px-[3px] ${rankBg}`}>
+          {Array.from({ length: n }).map((_, i) => (
+            <span key={i} className="h-1/2 w-[2px] rounded-full bg-white/90 shadow-[0_0_1px_rgba(0,0,0,0.4)]" />
           ))}
         </span>
       </span>
-      {showLabel ? <span className="text-xs">{beltLabel(belt, stripes)}</span> : null}
+      {showLabel ? <span className="text-xs font-medium">{beltLabel(belt, stripes)}</span> : null}
     </span>
   );
 }

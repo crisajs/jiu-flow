@@ -26,7 +26,7 @@ export const NAV: NavItem[] = [
   { icon: Users, label: "Alunos", to: "/dashboard/alunos", roles: ["mestre", "adm"] },
   { icon: Calendar, label: "Cronograma", to: "/dashboard/cronograma", roles: ["aluno", "mestre", "adm"] },
   { icon: Activity, label: "Presença", alunoLabel: "Minha Presença", to: "/dashboard/presenca", roles: ["aluno", "mestre", "adm"] },
-  { icon: Trophy, label: "Graduações", alunoLabel: "Minha Evolução", to: "/dashboard/graduacoes", roles: ["aluno", "mestre", "adm"] },
+  { icon: Trophy, label: "Faixas", alunoLabel: "Minha Faixa", to: "/dashboard/graduacoes", roles: ["aluno", "mestre", "adm"] },
   { icon: Wallet, label: "Financeiro", alunoLabel: "Mensalidade", to: "/dashboard/financeiro", roles: ["aluno", "mestre"] },
   { icon: MessageCircle, label: "WhatsApp", to: "/dashboard/whatsapp", roles: ["adm"], enabled: false },
   { icon: Award, label: "Eventos", to: "/dashboard/eventos", roles: ["aluno", "mestre", "adm"] },
