@@ -81,9 +81,9 @@ function Alunos() {
           <thead>
             <tr className="border-b border-border bg-card text-left text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
               <th className="px-4 py-3 font-normal">Aluno</th>
+              <th className="px-4 py-3 font-normal">Matrícula</th>
               <th className="px-4 py-3 font-normal">Faixa</th>
               <th className="px-4 py-3 font-normal">Turma</th>
-              <th className="px-4 py-3 font-normal">Início</th>
               <th className="px-4 py-3 font-normal">Status</th>
             </tr>
           </thead>
@@ -120,9 +120,9 @@ function Row({ s }: { s: Student }) {
           </div>
         </div>
       </td>
+      <td className="px-4 py-3"><span className="text-display tracking-[0.15em] text-muted-foreground">{s.enrollmentCode ?? "—"}</span></td>
       <td className="px-4 py-3"><BeltTag belt={s.belt} stripes={s.stripes} /></td>
       <td className="px-4 py-3 text-muted-foreground">{s.category}</td>
-      <td className="px-4 py-3 text-muted-foreground">{s.joinedAt ? new Date(s.joinedAt + "T00:00").toLocaleDateString("pt-BR") : "—"}</td>
       <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
     </tr>
   );
@@ -130,6 +130,7 @@ function Row({ s }: { s: Student }) {
 
 function AddStudentModal({ onClose }: { onClose: () => void }) {
   const add = useAddStudent();
+  const [savedCode, setSavedCode] = useState<string | null>(null);
   const [form, setForm] = useState({
     name: "",
     whatsapp: "",
@@ -152,7 +153,23 @@ function AddStudentModal({ onClose }: { onClose: () => void }) {
         stripes: form.stripes,
         category: form.category,
       },
-      { onSuccess: onClose },
+      { onSuccess: (code) => setSavedCode(code) },
+    );
+  }
+
+  if (savedCode) {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4" onClick={onClose}>
+        <div className="w-full max-w-sm border border-border bg-card p-8 text-center" onClick={(e) => e.stopPropagation()}>
+          <div className="text-[10px] tracking-[0.3em] text-muted-foreground">MATRÍCULA CRIADA</div>
+          <h2 className="text-display mt-3 text-2xl">{form.name.split(" ")[0]} matriculado ✓</h2>
+          <p className="mt-4 text-sm text-muted-foreground">Entregue este código ao aluno — é a matrícula dele pra entrar no app:</p>
+          <div className="text-display mt-4 select-all border border-border bg-background py-4 text-3xl tracking-[0.3em]">{savedCode}</div>
+          <button onClick={onClose} className="text-display mt-6 w-full bg-primary px-6 py-3 text-xs text-primary-foreground transition hover:bg-primary/90">
+            Concluir
+          </button>
+        </div>
+      </div>
     );
   }
 

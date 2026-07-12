@@ -18,6 +18,7 @@ export type Student = {
   joinedAt: string; // ISO
   age: number | null;
   whatsapp: string;
+  enrollmentCode?: string | null; // matrícula (código de acesso do aluno)
 };
 
 // Vazio — os dados vêm do banco.

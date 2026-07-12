@@ -44,7 +44,16 @@ function toStudent(r: StudentRow): Student {
     joinedAt: r.joined_at,
     age: r.age,
     whatsapp: r.whatsapp ?? "",
+    enrollmentCode: r.enrollment_code,
   };
+}
+
+// Código de matrícula aleatório e não-adivinhável (sem 0/O/1/I/L).
+function genEnrollmentCode(): string {
+  const A = "ABCDEFGHJKMNPQRSTUVWXYZ23456789";
+  let c = "";
+  for (let i = 0; i < 6; i++) c += A[Math.floor(Math.random() * A.length)];
+  return c;
 }
 
 type ClassRow = {
@@ -129,9 +138,11 @@ export type NewStudent = {
 export function useAddStudent() {
   const qc = useQueryClient();
   return useMutation({
-    mutationFn: async (s: NewStudent) => {
+    mutationFn: async (s: NewStudent): Promise<string> => {
+      const code = genEnrollmentCode();
       const { error } = await supabase.from("students").insert({
         name: s.name.trim(),
+        enrollment_code: code,
         whatsapp: s.whatsapp?.trim() || null,
         age: s.age ?? null,
         belt: s.belt,
@@ -142,6 +153,7 @@ export function useAddStudent() {
         status: "ativo",
       });
       if (error) throw error;
+      return code; // devolve a matrícula gerada para o gestor entregar ao aluno
     },
     onSuccess: () => qc.invalidateQueries({ queryKey: ["students"] }),
   });
