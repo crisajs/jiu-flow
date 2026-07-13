@@ -151,7 +151,14 @@ function TopBar({ onMenu }: { onMenu: () => void }) {
               {user.initials}
             </div>
             {!devMode ? (
-              <button onClick={() => signOut()} className="text-muted-foreground transition hover:text-foreground" aria-label="Sair">
+              <button
+                onClick={async () => {
+                  await signOut();
+                  window.location.href = "/entrar";
+                }}
+                className="text-muted-foreground transition hover:text-foreground"
+                aria-label="Sair"
+              >
                 <LogOut className="h-4 w-4" />
               </button>
             ) : null}
