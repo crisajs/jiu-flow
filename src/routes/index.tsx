@@ -371,8 +371,13 @@ function Landing() {
               <div className="text-xs text-muted-foreground">© {new Date().getFullYear()} — Todos os direitos reservados.</div>
             </div>
           </div>
-          <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
-            Disciplina · Evolução · Comunidade
+          <div className="flex flex-col gap-3 sm:items-end">
+            <Link to="/entrar" className="text-display text-xs transition hover:text-muted-foreground">
+              Área do Aluno →
+            </Link>
+            <div className="text-xs uppercase tracking-[0.25em] text-muted-foreground">
+              Disciplina · Evolução · Comunidade
+            </div>
           </div>
         </div>
       </footer>

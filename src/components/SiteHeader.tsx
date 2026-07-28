@@ -20,12 +20,17 @@ export function SiteHeader() {
           <a href="#local" className="text-muted-foreground transition hover:text-foreground">Local</a>
         </nav>
 
-        <Link
-          to="/agendar"
-          className="text-display rounded-sm bg-primary px-4 py-2.5 text-xs text-primary-foreground transition hover:bg-primary/90"
-        >
-          Aula Experimental
-        </Link>
+        <div className="flex items-center gap-3 sm:gap-5">
+          <Link to="/entrar" className="text-display text-xs text-muted-foreground transition hover:text-foreground">
+            Sou aluno
+          </Link>
+          <Link
+            to="/agendar"
+            className="text-display inline-flex items-center rounded-sm bg-primary px-3 py-2.5 text-xs text-primary-foreground transition hover:bg-primary/90 sm:px-4"
+          >
+            Aula Experimental
+          </Link>
+        </div>
       </div>
     </header>
   );
