@@ -6,6 +6,7 @@ import type { BeltId } from "../belts";
 import type { Student } from "../data/students";
 import type { ClassSession } from "../data/schedule";
 import type { SchoolEvent } from "../data/events";
+import { SCHOOL } from "../data/school";
 
 // ——————————————————————— Mapeadores (linha do banco → shape do app) ———————————————————————
 
@@ -149,7 +150,7 @@ export function useAddStudent() {
         stripes: s.stripes,
         category: s.category,
         plan: "Mensal",
-        monthly_fee: 0,
+        monthly_fee: SCHOOL.monthlyFee,
         status: "ativo",
       });
       if (error) throw error;
@@ -213,6 +214,55 @@ export function useAttendanceToday() {
       if (error) throw error;
       return count ?? 0;
     },
+  });
+}
+
+// ——————————————————————— Mensalidades (pago / não pago) ———————————————————————
+
+const MONTHS = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+
+/** Referência do mês corrente, ex.: "Jul/2026". */
+export function currentRef(d = new Date()): string {
+  return `${MONTHS[d.getMonth()]}/${d.getFullYear()}`;
+}
+
+/** Faturas de um mês. Devolve Set com os student_id já pagos. */
+export function useMonthPayments(ref: string = currentRef()) {
+  return useQuery({
+    queryKey: ["payments", ref],
+    queryFn: async (): Promise<Set<string>> => {
+      const { data, error } = await supabase
+        .from("invoices")
+        .select("student_id, status")
+        .eq("ref", ref)
+        .eq("status", "pago");
+      if (error) throw error;
+      return new Set((data as { student_id: string }[]).map((r) => r.student_id));
+    },
+  });
+}
+
+/** Alterna pago/não pago de um aluno no mês (upsert na fatura). */
+export function useTogglePayment(ref: string = currentRef()) {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ studentId, paid }: { studentId: string; paid: boolean }) => {
+      const now = new Date();
+      const { error } = await supabase.from("invoices").upsert(
+        {
+          student_id: studentId,
+          ref,
+          due_date: new Date(now.getFullYear(), now.getMonth(), 10).toISOString().slice(0, 10),
+          amount: SCHOOL.monthlyFee,
+          status: paid ? "pago" : "pendente",
+          method: paid ? "Pix" : null,
+          paid_at: paid ? now.toISOString() : null,
+        },
+        { onConflict: "student_id,ref" },
+      );
+      if (error) throw error;
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["payments", ref] }),
   });
 }
 

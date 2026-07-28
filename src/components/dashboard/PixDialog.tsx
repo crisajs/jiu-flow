@@ -3,7 +3,7 @@ import { QRCodeSVG } from "qrcode.react";
 import { X, Copy, Check } from "lucide-react";
 import { mensalidadePixPayload, isPixConfigured, PIX_CONFIG } from "@/lib/pix";
 
-// Modal de pagamento Pix da mensalidade (valor ABERTO — o aluno digita no banco).
+// Modal de pagamento Pix da mensalidade (valor fixo já embutido no QR).
 export function PixDialog({ onClose }: { onClose: () => void }) {
   const [copied, setCopied] = useState(false);
   const payload = isPixConfigured ? mensalidadePixPayload() : "";
@@ -40,7 +40,8 @@ export function PixDialog({ onClose }: { onClose: () => void }) {
             </div>
 
             <p className="mt-4 text-center text-xs text-muted-foreground">
-              Escaneie no app do banco. O <strong className="text-foreground">valor é aberto</strong> — digite o da sua mensalidade.
+              Escaneie no app do banco. Valor da mensalidade{" "}
+              <strong className="text-foreground">{PIX_CONFIG.monthlyAmount.toLocaleString("pt-BR", { style: "currency", currency: "BRL" })}</strong> já incluso.
             </p>
 
             <div className="mt-5">

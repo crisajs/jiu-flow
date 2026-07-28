@@ -69,21 +69,18 @@ export const PIX_CONFIG = {
   key: (import.meta.env.VITE_PIX_KEY as string | undefined) ?? "",
   merchantName: (import.meta.env.VITE_PIX_MERCHANT_NAME as string | undefined) ?? "X BJJ SCHOOL",
   merchantCity: (import.meta.env.VITE_PIX_CITY as string | undefined) ?? "SAO PAULO",
-  monthlyAmount: Number(import.meta.env.VITE_PIX_AMOUNT ?? 60),
+  monthlyAmount: Number(import.meta.env.VITE_PIX_AMOUNT ?? 70),
 };
 
 export const isPixConfigured = Boolean(PIX_CONFIG.key);
 
-/**
- * Payload da mensalidade — Pix de VALOR ABERTO (sem amount): o aluno digita
- * o valor no app do banco. Mantemos a chave fixa da escola.
- */
-export function mensalidadePixPayload(): string {
+/** Payload da mensalidade com o valor fixo já embutido no QR. */
+export function mensalidadePixPayload(amount = PIX_CONFIG.monthlyAmount): string {
   return buildPixPayload({
     key: PIX_CONFIG.key,
     merchantName: PIX_CONFIG.merchantName,
     merchantCity: PIX_CONFIG.merchantCity,
-    // sem `amount` → Pix aberto
+    amount,
     txid: "MENSALIDADE",
   });
 }

@@ -6,9 +6,10 @@ export const SCHOOL = {
   shortName: "X BJJ School",
   foundedYear: 2024,
   city: "Taboão da Serra · SP",
-  address: "Rua Ermelino José de Oliveira, 519 – Parque Pinheiros, Taboão da Serra – SP",
+  address: "Rua Ibiúna, 183 – Arraial Paulista, Taboão da Serra – SP",
   phone: "+55 11 92462-3307",
   phoneDigits: "5511924623307", // para wa.me / tel:
+  monthlyFee: 70, // mensalidade fixa
   // Estatísticas realistas para uma escola com 2 anos de tatame.
   stats: {
     activeStudents: 34,

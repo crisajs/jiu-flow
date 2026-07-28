@@ -1,9 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Check, Search } from "lucide-react";
 import { useAuth } from "@/lib/auth";
-import { Card, Eyebrow, Kpi, PageHeader, SectionLabel, StatusBadge, Restricted } from "@/components/dashboard/primitives";
+import { Card, Kpi, PageHeader, SectionLabel, StatusBadge, Restricted, BeltTag } from "@/components/dashboard/primitives";
 import { PixDialog } from "@/components/dashboard/PixDialog";
-import { FINANCE_SUMMARY, REVENUE_12M, MY_INVOICES, STUDENTS, brl, type Invoice } from "@/lib/data";
+import { SCHOOL, brl, type Student } from "@/lib/data";
+import { useStudents, useMonthPayments, useTogglePayment, useMyStudent, currentRef } from "@/lib/db/queries";
 
 export const Route = createFileRoute("/dashboard/financeiro")({
   head: () => ({ meta: [{ title: "Financeiro — X BJJ School" }] }),
@@ -21,122 +23,135 @@ function Financeiro() {
   );
 }
 
+// ——————————————————————— MESTRE: pago / não pago do mês ———————————————————————
 function AdmFinanceiro() {
-  const max = Math.max(...REVENUE_12M.map((d) => d.value));
-  const inadimplentes = STUDENTS.filter((s) => s.status === "inadimplente").slice(0, 8);
+  const ref = currentRef();
+  const { data: students = [], isLoading } = useStudents();
+  const { data: paid = new Set<string>() } = useMonthPayments(ref);
+  const toggle = useTogglePayment(ref);
+  const [q, setQ] = useState("");
+  const [onlyPending, setOnlyPending] = useState(false);
+
+  const filtered = useMemo(
+    () =>
+      students.filter((s) => {
+        const matchQ = s.name.toLowerCase().includes(q.toLowerCase());
+        return matchQ && (!onlyPending || !paid.has(s.id));
+      }),
+    [students, q, onlyPending, paid],
+  );
+
+  const paidCount = students.filter((s) => paid.has(s.id)).length;
+  const pendingCount = students.length - paidCount;
 
   return (
     <div className="space-y-6 p-4 sm:p-6">
-      <PageHeader
-        eyebrow="FINANCEIRO"
-        title="Receita & Mensalidades"
-        actions={
-          <button className="text-display border border-border px-4 py-2.5 text-xs transition hover:bg-accent">
-            Exportar
-          </button>
-        }
-      />
+      <PageHeader eyebrow={`MENSALIDADES · ${ref.toUpperCase()}`} title="Financeiro" />
 
-      <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-2 lg:grid-cols-4">
-        <Kpi label="Receita do mês" value={brl(FINANCE_SUMMARY.monthlyRevenue)} hint={`+${FINANCE_SUMMARY.revenueDeltaPct}% vs mês passado`} />
-        <Kpi label="Inadimplência" value={`${FINANCE_SUMMARY.defaultRate}%`} hint={brl(FINANCE_SUMMARY.pendingAmount) + " em aberto"} />
-        <Kpi label="Pagas no mês" value={FINANCE_SUMMARY.paidThisMonth} hint="mensalidades quitadas" />
-        <Kpi label="Pendentes" value={FINANCE_SUMMARY.pendingCount} hint="mensalidades a receber" />
+      <div className="grid gap-px overflow-hidden border border-border bg-border sm:grid-cols-3">
+        <Kpi label="Recebido" value={brl(paidCount * SCHOOL.monthlyFee)} hint={`${paidCount} de ${students.length} pagos`} />
+        <Kpi label="A receber" value={brl(pendingCount * SCHOOL.monthlyFee)} hint={`${pendingCount} pendentes`} />
+        <Kpi label="Mensalidade" value={brl(SCHOOL.monthlyFee)} hint="valor fixo por aluno" />
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-3">
-        <Card className="lg:col-span-2">
-          <Eyebrow>RECEITA · 12 MESES</Eyebrow>
-          <div className="mt-8 flex h-48 items-end gap-2">
-            {REVENUE_12M.map((d) => (
-              <div key={d.month} className="group flex flex-1 flex-col items-center gap-2">
-                <div className="w-full bg-foreground/80 transition group-hover:bg-foreground" style={{ height: `${(d.value / max) * 100}%` }} />
-                <span className="text-[9px] uppercase tracking-wider text-muted-foreground">{d.month}</span>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        <Card>
-          <Eyebrow>INADIMPLENTES</Eyebrow>
-          <ul className="mt-5 divide-y divide-border">
-            {inadimplentes.map((s) => (
-              <li key={s.id} className="flex items-center justify-between py-3">
-                <div className="min-w-0">
-                  <div className="truncate text-sm">{s.name}</div>
-                  <div className="text-xs text-muted-foreground">{brl(s.monthlyFee)} · {s.plan}</div>
-                </div>
-                <button className="text-display border border-border px-2.5 py-1.5 text-[10px] uppercase tracking-wider transition hover:bg-accent">
-                  Cobrar
-                </button>
-              </li>
-            ))}
-          </ul>
-        </Card>
-      </div>
-    </div>
-  );
-}
-
-function AlunoFinanceiro() {
-  const [pixOpen, setPixOpen] = useState(false);
-
-  return (
-    <div className="space-y-6 p-4 sm:p-6">
-      <PageHeader eyebrow="MINHA MENSALIDADE" title="Mensalidade" />
-
-      <div className="grid gap-6 lg:grid-cols-3">
-        <div className="space-y-3 lg:col-span-2">
-          {MY_INVOICES.map((inv) => (
-            <InvoiceRow key={inv.id} inv={inv} onPay={() => setPixOpen(true)} />
-          ))}
+      <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-1 items-center gap-2 border border-border bg-background px-3 py-2.5 sm:max-w-xs">
+          <Search className="h-4 w-4 text-muted-foreground" />
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            placeholder="Buscar aluno..."
+            className="w-full bg-transparent text-sm outline-none placeholder:text-muted-foreground"
+          />
         </div>
-
-        <Card className="h-fit">
-          <SectionLabel>Plano atual</SectionLabel>
-          <div className="text-display mt-3 text-3xl">{brl(60)}<span className="text-sm text-muted-foreground">/mês</span></div>
-          <div className="mt-1 text-xs text-muted-foreground">Plano Mensal</div>
-          <button
-            onClick={() => setPixOpen(true)}
-            className="text-display mt-5 w-full bg-primary px-4 py-3 text-center text-xs text-primary-foreground transition hover:bg-primary/90"
-          >
-            Pagar via Pix
-          </button>
-          <div className="mt-5 border-t border-border pt-5 text-xs text-muted-foreground">
-            O Pix tem <span className="text-foreground">valor aberto</span> — digite o valor da mensalidade no app do banco.
-          </div>
-        </Card>
+        <button
+          onClick={() => setOnlyPending((v) => !v)}
+          className={`border px-3 py-2 text-xs transition ${
+            onlyPending ? "border-foreground bg-foreground text-background" : "border-border text-muted-foreground hover:text-foreground"
+          }`}
+        >
+          Só pendentes
+        </button>
       </div>
 
-      {pixOpen ? <PixDialog onClose={() => setPixOpen(false)} /> : null}
-    </div>
-  );
-}
-
-function InvoiceRow({ inv, onPay }: { inv: Invoice; onPay: () => void }) {
-  const open = inv.status !== "pago";
-
-  return (
-    <div className="flex flex-wrap items-center justify-between gap-4 border border-border bg-card p-4">
-      <div>
-        <div className="text-display text-lg">{inv.ref}</div>
-        <div className="text-xs text-muted-foreground">
-          Vencimento {new Date(inv.dueDate + "T00:00").toLocaleDateString("pt-BR")}
-          {inv.method ? ` · ${inv.method}` : ""}
-        </div>
-      </div>
-      <div className="flex items-center gap-4">
-        <span className="text-display text-lg">{brl(inv.amount)}</span>
-        <StatusBadge status={inv.status} />
-        {open ? (
-          <button
-            onClick={onPay}
-            className="text-display bg-primary px-4 py-2 text-xs text-primary-foreground transition hover:bg-primary/90"
-          >
-            Pagar Pix
-          </button>
+      <div className="space-y-2">
+        {isLoading ? <div className="py-10 text-center text-sm text-muted-foreground">Carregando…</div> : null}
+        {filtered.map((s) => (
+          <PaymentRow
+            key={s.id}
+            s={s}
+            paid={paid.has(s.id)}
+            onToggle={(next) => toggle.mutate({ studentId: s.id, paid: next })}
+          />
+        ))}
+        {!isLoading && filtered.length === 0 ? (
+          <div className="border border-border bg-card py-10 text-center text-sm text-muted-foreground">Nenhum aluno.</div>
         ) : null}
       </div>
+    </div>
+  );
+}
+
+function PaymentRow({ s, paid, onToggle }: { s: Student; paid: boolean; onToggle: (next: boolean) => void }) {
+  return (
+    <div className="flex flex-wrap items-center gap-4 border border-border bg-card p-4">
+      <span className="text-display grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent text-xs">{s.initials}</span>
+      <div className="min-w-[9rem] flex-1">
+        <div className="text-sm font-medium">{s.name}</div>
+        <div className="text-xs text-muted-foreground">{s.category}</div>
+      </div>
+      <BeltTag belt={s.belt} stripes={s.stripes} size="sm" showLabel={false} />
+      <span className="text-display text-sm">{brl(SCHOOL.monthlyFee)}</span>
+      <StatusBadge status={paid ? "pago" : "pendente"} />
+      <button
+        onClick={() => onToggle(!paid)}
+        className={`text-display inline-flex items-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider transition ${
+          paid
+            ? "border border-border text-muted-foreground hover:bg-accent"
+            : "bg-primary text-primary-foreground hover:bg-primary/90"
+        }`}
+      >
+        {paid ? "Desfazer" : <><Check className="h-3.5 w-3.5" /> Marcar pago</>}
+      </button>
+    </div>
+  );
+}
+
+// ——————————————————————— ALUNO: minha mensalidade ———————————————————————
+function AlunoFinanceiro() {
+  const ref = currentRef();
+  const { data: me } = useMyStudent();
+  const { data: paid = new Set<string>() } = useMonthPayments(ref);
+  const [pixOpen, setPixOpen] = useState(false);
+  const isPaid = !!me && paid.has(me.id);
+
+  return (
+    <div className="space-y-6 p-4 sm:p-6">
+      <PageHeader eyebrow={`MINHA MENSALIDADE · ${ref.toUpperCase()}`} title="Mensalidade" />
+
+      <Card className="max-w-md">
+        <SectionLabel>Valor mensal</SectionLabel>
+        <div className="text-display mt-3 text-4xl">{brl(SCHOOL.monthlyFee)}</div>
+        <div className="mt-4"><StatusBadge status={isPaid ? "pago" : "pendente"} /></div>
+
+        {isPaid ? (
+          <p className="mt-5 text-sm text-muted-foreground">Mensalidade deste mês quitada. Bons treinos! 🥋</p>
+        ) : (
+          <>
+            <button
+              onClick={() => setPixOpen(true)}
+              className="text-display mt-6 w-full bg-primary px-6 py-3 text-xs text-primary-foreground transition hover:bg-primary/90"
+            >
+              Pagar via Pix
+            </button>
+            <p className="mt-3 text-[11px] text-muted-foreground">
+              Após o pagamento, o professor confirma no sistema.
+            </p>
+          </>
+        )}
+      </Card>
+
+      {pixOpen ? <PixDialog onClose={() => setPixOpen(false)} /> : null}
     </div>
   );
 }
