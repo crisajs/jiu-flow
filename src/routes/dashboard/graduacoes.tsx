@@ -75,15 +75,15 @@ function BeltRow({ s }: { s: Student }) {
   }
 
   return (
-    <div className="flex flex-wrap items-center gap-4 border border-border bg-card p-4">
+    <div className="flex flex-wrap items-center gap-3 border border-border bg-card p-3 sm:gap-4 sm:p-4">
       <span className="text-display grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent text-xs">{s.initials}</span>
-      <div className="min-w-[9rem] flex-1">
-        <div className="text-sm font-medium">{s.name}</div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium">{s.name}</div>
         <div className="text-xs text-muted-foreground">{s.category}</div>
       </div>
 
       {editing ? (
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto">
           <select value={belt} onChange={(e) => setBelt(e.target.value as BeltId)} className="border border-border bg-background px-2 py-2 text-sm outline-none focus:border-foreground">
             {BELT_ORDER.map((b) => <option key={b} value={b}>{BELTS[b].label}</option>)}
           </select>
@@ -99,8 +99,8 @@ function BeltRow({ s }: { s: Student }) {
         </div>
       ) : (
         <>
-          <BeltTag belt={s.belt} stripes={s.stripes} />
-          <button onClick={() => setEditing(true)} className="text-display inline-flex items-center gap-1.5 border border-border px-3 py-2 text-[10px] uppercase tracking-wider transition hover:bg-accent">
+          <BeltTag belt={s.belt} stripes={s.stripes} showLabel={false} />
+          <button onClick={() => setEditing(true)} className="text-display ml-auto inline-flex items-center gap-1.5 border border-border px-4 py-2 text-[10px] uppercase tracking-wider transition hover:bg-accent">
             <Pencil className="h-3.5 w-3.5" /> Editar
           </button>
         </>

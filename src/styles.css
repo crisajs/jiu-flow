@@ -108,5 +108,13 @@
     color: var(--color-foreground);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    /* trava rolagem lateral no celular (tipografia display é muito larga) */
+    overflow-x: hidden;
+  }
+  /* alvos de toque confortáveis no celular */
+  @media (max-width: 640px) {
+    button, a[href], select, input, [role="button"] {
+      min-height: 44px;
+    }
   }
 }

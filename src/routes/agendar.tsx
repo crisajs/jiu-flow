@@ -38,7 +38,7 @@ function Agendar() {
         <div>
           <div className="text-[10px] tracking-[0.3em] text-muted-foreground">AULA EXPERIMENTAL</div>
           <h1 className="text-display mt-4 text-5xl leading-[0.9] sm:text-6xl">
-            Sua primeira<br />aula é por nossa<br />conta.
+            Sua primeira<br className="hidden sm:inline" /> aula é por nossa<br className="hidden sm:inline" /> conta.
           </h1>
           <p className="mt-6 max-w-md text-muted-foreground">
             Preencha o formulário. Em seguida você recebe confirmação no WhatsApp e

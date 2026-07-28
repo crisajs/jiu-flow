@@ -94,18 +94,17 @@ function AdmFinanceiro() {
 
 function PaymentRow({ s, paid, onToggle }: { s: Student; paid: boolean; onToggle: (next: boolean) => void }) {
   return (
-    <div className="flex flex-wrap items-center gap-4 border border-border bg-card p-4">
+    <div className="flex flex-wrap items-center gap-3 border border-border bg-card p-3 sm:gap-4 sm:p-4">
       <span className="text-display grid h-9 w-9 shrink-0 place-items-center rounded-full bg-accent text-xs">{s.initials}</span>
-      <div className="min-w-[9rem] flex-1">
-        <div className="text-sm font-medium">{s.name}</div>
-        <div className="text-xs text-muted-foreground">{s.category}</div>
+      <div className="min-w-0 flex-1">
+        <div className="truncate text-sm font-medium">{s.name}</div>
+        <div className="text-xs text-muted-foreground">{s.category} · {brl(SCHOOL.monthlyFee)}</div>
       </div>
       <BeltTag belt={s.belt} stripes={s.stripes} size="sm" showLabel={false} />
-      <span className="text-display text-sm">{brl(SCHOOL.monthlyFee)}</span>
       <StatusBadge status={paid ? "pago" : "pendente"} />
       <button
         onClick={() => onToggle(!paid)}
-        className={`text-display inline-flex items-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider transition ${
+        className={`text-display inline-flex w-full items-center justify-center gap-1.5 px-4 py-2 text-[10px] uppercase tracking-wider transition sm:w-auto ${
           paid
             ? "border border-border text-muted-foreground hover:bg-accent"
             : "bg-primary text-primary-foreground hover:bg-primary/90"

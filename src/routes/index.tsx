@@ -33,7 +33,7 @@ function Landing() {
               CENTRO DE TREINAMENTO · TABOÃO DA SERRA · DESDE 2024
             </div>
 
-            <h1 className="text-display text-[14vw] leading-[0.85] sm:text-[10vw] lg:text-[8.5rem]">
+            <h1 className="text-display text-[11vw] leading-[0.9] sm:text-[10vw] lg:text-[8.5rem]">
               Disciplina.<br />
               Evolução.<br />
               <span className="text-muted-foreground">Performance.</span>
@@ -78,7 +78,7 @@ function Landing() {
           <div className="mb-16 flex flex-col items-start justify-between gap-8 md:flex-row md:items-end">
             <div>
               <div className="text-[10px] tracking-[0.3em] text-muted-foreground">01 / TREINOS</div>
-              <h2 className="text-display mt-4 text-5xl sm:text-7xl">Um tatame para<br />cada objetivo.</h2>
+              <h2 className="text-display mt-4 text-5xl sm:text-7xl">Um tatame para<br className="hidden sm:inline" /> cada objetivo.</h2>
             </div>
             <p className="max-w-sm text-muted-foreground">
               Turmas para todas as idades e níveis — do primeiro kimono ao time de competição.
@@ -134,8 +134,8 @@ function Landing() {
 
         <div className="relative mx-auto max-w-7xl px-4 py-28 sm:px-6 sm:py-36">
           <div className="text-[10px] tracking-[0.3em] text-muted-foreground">03 / NOSSA HISTÓRIA</div>
-          <h2 className="text-display mt-6 text-6xl leading-[0.85] sm:text-8xl">
-            Da Garagem<br />
+          <h2 className="text-display mt-6 text-5xl leading-[0.9] sm:text-8xl sm:leading-[0.85]">
+            Da Garagem<br className="hidden sm:inline" />{" "}
             <span className="text-muted-foreground">ao Pódio.</span>
           </h2>
           <p className="mt-8 max-w-2xl text-lg text-muted-foreground sm:text-xl">
@@ -267,10 +267,10 @@ function Landing() {
 
           {/* Fechamento cinematográfico */}
           <div className="mt-28 border-t border-border pt-16 text-center">
-            <p className="text-display text-4xl leading-[1.05] sm:text-7xl">
-              Porque a nossa história<br />começou em uma garagem.
+            <p className="text-display text-3xl leading-[1.1] sm:text-7xl sm:leading-[1.05]">
+              Porque a nossa história<br className="hidden sm:inline" /> começou em uma garagem.
             </p>
-            <p className="text-display mt-8 text-4xl leading-[1.05] text-muted-foreground sm:text-7xl">
+            <p className="text-display mt-8 text-3xl leading-[1.1] text-muted-foreground sm:text-7xl sm:leading-[1.05]">
               E estamos apenas começando.
             </p>
           </div>

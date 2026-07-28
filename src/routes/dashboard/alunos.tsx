@@ -77,14 +77,14 @@ function Alunos() {
       </div>
 
       <div className="overflow-x-auto border border-border">
-        <table className="w-full min-w-[640px] text-sm">
+        <table className="w-full text-sm">
           <thead>
             <tr className="border-b border-border bg-card text-left text-[10px] uppercase tracking-[0.2em] text-muted-foreground">
-              <th className="px-4 py-3 font-normal">Aluno</th>
-              <th className="px-4 py-3 font-normal">Matrícula</th>
-              <th className="px-4 py-3 font-normal">Faixa</th>
-              <th className="px-4 py-3 font-normal">Turma</th>
-              <th className="px-4 py-3 font-normal">Status</th>
+              <th className="px-3 py-3 font-normal sm:px-4">Aluno</th>
+              <th className="hidden px-4 py-3 font-normal sm:table-cell">Matrícula</th>
+              <th className="px-3 py-3 font-normal sm:px-4">Faixa</th>
+              <th className="hidden px-4 py-3 font-normal md:table-cell">Turma</th>
+              <th className="hidden px-4 py-3 font-normal md:table-cell">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -111,19 +111,23 @@ function Alunos() {
 function Row({ s }: { s: Student }) {
   return (
     <tr className="border-b border-border transition hover:bg-card">
-      <td className="px-4 py-3">
+      <td className="px-3 py-3 sm:px-4">
         <div className="flex items-center gap-3">
           <span className="text-display grid h-8 w-8 shrink-0 place-items-center rounded-full bg-accent text-xs">{s.initials}</span>
-          <div>
-            <div className="font-medium">{s.name}</div>
-            <div className="text-xs text-muted-foreground">{s.whatsapp}</div>
+          <div className="min-w-0">
+            <div className="truncate font-medium">{s.name}</div>
+            <div className="truncate text-xs text-muted-foreground">{s.whatsapp}</div>
+            {/* no celular a matrícula/turma entram aqui (colunas ficam ocultas) */}
+            <div className="text-display mt-1 text-[11px] tracking-[0.15em] text-muted-foreground sm:hidden">
+              {s.enrollmentCode ?? "—"} · {s.category}
+            </div>
           </div>
         </div>
       </td>
-      <td className="px-4 py-3"><span className="text-display tracking-[0.15em] text-muted-foreground">{s.enrollmentCode ?? "—"}</span></td>
-      <td className="px-4 py-3"><BeltTag belt={s.belt} stripes={s.stripes} /></td>
-      <td className="px-4 py-3 text-muted-foreground">{s.category}</td>
-      <td className="px-4 py-3"><StatusBadge status={s.status} /></td>
+      <td className="hidden px-4 py-3 sm:table-cell"><span className="text-display tracking-[0.15em] text-muted-foreground">{s.enrollmentCode ?? "—"}</span></td>
+      <td className="px-3 py-3 sm:px-4"><BeltTag belt={s.belt} stripes={s.stripes} showLabel={false} /></td>
+      <td className="hidden px-4 py-3 text-muted-foreground md:table-cell">{s.category}</td>
+      <td className="hidden px-4 py-3 md:table-cell"><StatusBadge status={s.status} /></td>
     </tr>
   );
 }
