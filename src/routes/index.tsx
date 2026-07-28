@@ -380,6 +380,11 @@ function Landing() {
             </div>
           </div>
         </div>
+        <div className="border-t border-border/60">
+          <div className="mx-auto max-w-7xl px-4 py-4 text-center text-[10px] uppercase tracking-[0.3em] text-muted-foreground sm:px-6">
+            Desenvolvido por <span className="text-foreground">Prótea Technologies</span>
+          </div>
+        </div>
       </footer>
 
       <style>{`
