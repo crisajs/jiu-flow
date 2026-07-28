@@ -47,7 +47,8 @@ type AuthContextValue = {
   /** true quando não há Supabase configurado (preview local com seletor de papel) */
   devMode: boolean;
   devSetRole: (r: Role) => void;
-  signInWithGoogle: () => Promise<void>;
+  /** Aluno entra só com o código de matrícula (sessão anônima + vínculo). */
+  signInWithCode: (code: string) => Promise<{ error?: string }>;
   signInStaff: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 };
@@ -74,7 +75,7 @@ function LockedAuth({ children }: { children: ReactNode }) {
     isAdm: false,
     devMode: false,
     devSetRole: () => {},
-    signInWithGoogle: async () => {},
+    signInWithCode: async () => ({ error: "Login indisponível." }),
     signInStaff: async () => ({ error: "Autenticação indisponível." }),
     signOut: async () => {},
   };
@@ -102,7 +103,14 @@ function SupabaseAuth({ children }: { children: ReactNode }) {
         .maybeSingle();
       if (!active) return;
       const role = (data?.role ?? "aluno") as Role;
-      const name = data?.full_name || (s.user.user_metadata?.full_name as string) || s.user.email || "Usuário";
+      let name = data?.full_name || s.user.email || "Aluno";
+
+      // Sessão anônima do aluno não tem e-mail: usa o nome do cadastro.
+      if (data?.student_id) {
+        const { data: st } = await supabase.from("students").select("name").eq("id", data.student_id).maybeSingle();
+        if (st?.name) name = st.name;
+      }
+      if (!active) return;
       setUser({ role, name, initials: initials(name), subtitle: ROLE_LABEL[role], studentId: data?.student_id ?? null });
     }
 
@@ -131,11 +139,17 @@ function SupabaseAuth({ children }: { children: ReactNode }) {
     isAdm: user?.role === "adm",
     devMode: false,
     devSetRole: () => {},
-    signInWithGoogle: async () => {
-      await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: { redirectTo: `${window.location.origin}/dashboard` },
-      });
+    signInWithCode: async (code) => {
+      const { error: anonErr } = await supabase.auth.signInAnonymously();
+      if (anonErr) return { error: anonErr.message };
+
+      const { data, error } = await supabase.rpc("claim_enrollment", { p_code: code.trim() });
+      if (error) return { error: error.message };
+      if (data !== true) {
+        await supabase.auth.signOut(); // código inválido: não deixa sessão órfã
+        return { error: "Matrícula não encontrada. Confira com o professor." };
+      }
+      return {};
     },
     signInStaff: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -171,7 +185,7 @@ function DevAuth({ children }: { children: ReactNode }) {
     isAdm: role === "adm",
     devMode: true,
     devSetRole,
-    signInWithGoogle: async () => {},
+    signInWithCode: async () => ({ error: "Login indisponível." }),
     signInStaff: async () => ({ error: "Supabase não configurado (modo dev)." }),
     signOut: async () => {},
   };
