@@ -124,7 +124,7 @@ function StudentHome() {
           <SectionLabel>Mensalidade</SectionLabel>
         </div>
         <p className="mt-3 max-w-md text-sm text-muted-foreground">
-          Pague sua mensalidade via Pix — o valor é o combinado com a escola.
+          Mensalidade de <span className="text-foreground">{brl(SCHOOL.monthlyFee)}</span> — pague via Pix, valor já no QR.
         </p>
         <Link to="/dashboard/financeiro" className="text-display mt-6 inline-block bg-primary px-6 py-3 text-center text-xs text-primary-foreground transition hover:bg-primary/90">
           Pagar via Pix
