@@ -17,7 +17,7 @@ export type ClassSession = {
 export const DAYS = ["Dom", "Seg", "Ter", "Qua", "Qui", "Sex", "Sáb"];
 export const DAYS_FULL = ["Domingo", "Segunda", "Terça", "Quarta", "Quinta", "Sexta", "Sábado"];
 
-export const PROFESSORS = ["Mestre Xavier", "Prof. Ana Reis", "Prof. Bruno Tavares"];
+export const PROFESSORS = ["Mestre Eduardo"];
 
 const CAT_HEX: Record<ClassCategory, string> = {
   Gi: "#2563eb",

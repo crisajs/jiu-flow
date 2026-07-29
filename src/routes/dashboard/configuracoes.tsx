@@ -2,7 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useState } from "react";
 import { useAuth } from "@/lib/auth";
 import { Card, Eyebrow, PageHeader, SectionLabel, BeltTag } from "@/components/dashboard/primitives";
-import { SCHOOL, PROFESSORS, type Student } from "@/lib/data";
+import { SCHOOL, PROFESSORS, brl, type Student } from "@/lib/data";
 import { beltLabel, nextBelt } from "@/lib/belts";
 import { useMyStudent, useSetMyBelt } from "@/lib/db/queries";
 
@@ -55,25 +55,14 @@ function AdmConfig() {
               </li>
             ))}
           </ul>
-          <button className="text-display mt-5 w-full border border-border px-4 py-3 text-xs transition hover:bg-accent">
-            Adicionar professor
-          </button>
         </Card>
 
         <Card className="lg:col-span-2">
-          <Eyebrow>PLANOS & MENSALIDADES</Eyebrow>
-          <div className="mt-5 grid gap-4 sm:grid-cols-3">
-            {[
-              ["Mensal", "R$ 249"],
-              ["Trimestral", "R$ 219/mês"],
-              ["Anual", "R$ 199/mês"],
-            ].map(([n, v]) => (
-              <div key={n} className="border border-border bg-background p-5">
-                <div className="text-display text-lg">{v}</div>
-                <div className="mt-1 text-xs text-muted-foreground">Plano {n}</div>
-              </div>
-            ))}
+          <Eyebrow>MENSALIDADE</Eyebrow>
+          <div className="text-display mt-4 text-4xl">
+            {brl(SCHOOL.monthlyFee)}<span className="text-lg text-muted-foreground">/mês</span>
           </div>
+          <p className="mt-2 text-xs text-muted-foreground">Valor único para todos os alunos. Pagamento via Pix.</p>
         </Card>
       </div>
     </div>
