@@ -106,7 +106,57 @@ function AlunoPerfil() {
       </div>
 
       <BeltSelfEditor s={s} />
+      <SenhaCard />
     </div>
+  );
+}
+
+// Aluno define a própria senha. Depois disso a matrícula sozinha não entra mais.
+function SenhaCard() {
+  const { setMyPassword } = useAuth();
+  const [pw, setPw] = useState("");
+  const [pw2, setPw2] = useState("");
+  const [msg, setMsg] = useState("");
+  const [err, setErr] = useState("");
+  const [busy, setBusy] = useState(false);
+
+  async function salvar() {
+    setErr(""); setMsg("");
+    if (pw.length < 6) return setErr("Mínimo de 6 caracteres.");
+    if (pw !== pw2) return setErr("As senhas não conferem.");
+    setBusy(true);
+    const { error } = await setMyPassword(pw);
+    setBusy(false);
+    if (error) return setErr(error);
+    setPw(""); setPw2("");
+    setMsg("Senha criada. Nos próximos acessos use matrícula + senha.");
+  }
+
+  return (
+    <Card>
+      <Eyebrow>MINHA SENHA</Eyebrow>
+      <p className="mt-3 max-w-md text-sm text-muted-foreground">
+        Crie uma senha para proteger seu acesso. Depois disso, entrar exige matrícula <span className="text-foreground">e</span> senha.
+      </p>
+      <div className="mt-5 flex flex-wrap items-end gap-3">
+        <label className="block">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Nova senha</span>
+          <input type="password" value={pw} onChange={(e) => setPw(e.target.value)}
+            className="mt-1.5 block w-44 border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-foreground" />
+        </label>
+        <label className="block">
+          <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Repetir</span>
+          <input type="password" value={pw2} onChange={(e) => setPw2(e.target.value)}
+            className="mt-1.5 block w-44 border border-border bg-background px-3 py-2.5 text-sm outline-none focus:border-foreground" />
+        </label>
+        <button onClick={salvar} disabled={busy}
+          className="text-display bg-primary px-5 py-2.5 text-xs text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50">
+          {busy ? "Salvando…" : "Salvar senha"}
+        </button>
+      </div>
+      {err ? <div className="mt-3 text-xs text-red-400">{err}</div> : null}
+      {msg ? <div className="mt-3 text-xs text-green-400">{msg}</div> : null}
+    </Card>
   );
 }
 

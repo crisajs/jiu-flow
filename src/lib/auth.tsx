@@ -14,7 +14,13 @@ export type AuthUser = {
   subtitle: string;
   /** id do aluno vinculado (quando role = aluno) */
   studentId: string | null;
+  /** matrícula do aluno (usada como login ao criar senha) */
+  enrollmentCode?: string | null;
 };
+
+// E-mail técnico derivado da matrícula — nunca exibido, só identifica o
+// aluno no Supabase Auth para permitir senha própria.
+const studentEmail = (code: string) => `${code.trim().toLowerCase()}@alunos.xbjjschool.local`;
 
 function initials(name: string) {
   const p = name.trim().split(/\s+/);
@@ -47,8 +53,10 @@ type AuthContextValue = {
   /** true quando não há Supabase configurado (preview local com seletor de papel) */
   devMode: boolean;
   devSetRole: (r: Role) => void;
-  /** Aluno entra só com o código de matrícula (sessão anônima + vínculo). */
-  signInWithCode: (code: string) => Promise<{ error?: string }>;
+  /** Aluno entra com matrícula (1º acesso) ou matrícula + senha. */
+  signInWithCode: (code: string, password?: string) => Promise<{ error?: string }>;
+  /** Aluno cria a própria senha; a partir daí a matrícula sozinha não entra. */
+  setMyPassword: (password: string) => Promise<{ error?: string }>;
   signInStaff: (email: string, password: string) => Promise<{ error?: string }>;
   signOut: () => Promise<void>;
 };
@@ -76,6 +84,7 @@ function LockedAuth({ children }: { children: ReactNode }) {
     devMode: false,
     devSetRole: () => {},
     signInWithCode: async () => ({ error: "Login indisponível." }),
+    setMyPassword: async () => ({ error: "Indisponível." }),
     signInStaff: async () => ({ error: "Autenticação indisponível." }),
     signOut: async () => {},
   };
@@ -105,13 +114,26 @@ function SupabaseAuth({ children }: { children: ReactNode }) {
       const role = (data?.role ?? "aluno") as Role;
       let name = data?.full_name || s.user.email || "Aluno";
 
-      // Sessão anônima do aluno não tem e-mail: usa o nome do cadastro.
+      // Sessão do aluno não tem e-mail real: usa o nome do cadastro.
+      let code: string | null = null;
       if (data?.student_id) {
-        const { data: st } = await supabase.from("students").select("name").eq("id", data.student_id).maybeSingle();
+        const { data: st } = await supabase
+          .from("students")
+          .select("name, enrollment_code")
+          .eq("id", data.student_id)
+          .maybeSingle();
         if (st?.name) name = st.name;
+        code = st?.enrollment_code ?? null;
       }
       if (!active) return;
-      setUser({ role, name, initials: initials(name), subtitle: ROLE_LABEL[role], studentId: data?.student_id ?? null });
+      setUser({
+        role,
+        name,
+        initials: initials(name),
+        subtitle: ROLE_LABEL[role],
+        studentId: data?.student_id ?? null,
+        enrollmentCode: code,
+      });
     }
 
     supabase.auth.getSession().then(async ({ data }) => {
@@ -139,17 +161,42 @@ function SupabaseAuth({ children }: { children: ReactNode }) {
     isAdm: user?.role === "adm",
     devMode: false,
     devSetRole: () => {},
-    signInWithCode: async (code) => {
+    signInWithCode: async (code, password) => {
+      const email = studentEmail(code);
+
+      // Já tem senha: entra direto por matrícula + senha.
+      if (password) {
+        const { error } = await supabase.auth.signInWithPassword({ email, password });
+        return error ? { error: "Matrícula ou senha incorreta." } : {};
+      }
+
+      // 1º acesso: sessão anônima + vínculo pela matrícula.
       const { error: anonErr } = await supabase.auth.signInAnonymously();
       if (anonErr) return { error: anonErr.message };
 
       const { data, error } = await supabase.rpc("claim_enrollment", { p_code: code.trim() });
-      if (error) return { error: error.message };
+      if (error) {
+        await supabase.auth.signOut();
+        if (error.message.includes("SENHA_NECESSARIA")) {
+          return { error: "NEEDS_PASSWORD" };
+        }
+        return { error: error.message };
+      }
       if (data !== true) {
         await supabase.auth.signOut(); // código inválido: não deixa sessão órfã
         return { error: "Matrícula não encontrada. Confira com o professor." };
       }
       return {};
+    },
+    setMyPassword: async (password) => {
+      const code = user?.enrollmentCode;
+      if (!code) return { error: "Matrícula não encontrada na sessão." };
+
+      const { error } = await supabase.auth.updateUser({ email: studentEmail(code), password });
+      if (error) return { error: error.message };
+
+      const { error: rpcErr } = await supabase.rpc("mark_password_set");
+      return rpcErr ? { error: rpcErr.message } : {};
     },
     signInStaff: async (email, password) => {
       const { error } = await supabase.auth.signInWithPassword({ email, password });
@@ -186,6 +233,7 @@ function DevAuth({ children }: { children: ReactNode }) {
     devMode: true,
     devSetRole,
     signInWithCode: async () => ({ error: "Login indisponível." }),
+    setMyPassword: async () => ({ error: "Indisponível." }),
     signInStaff: async () => ({ error: "Supabase não configurado (modo dev)." }),
     signOut: async () => {},
   };

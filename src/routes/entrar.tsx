@@ -13,6 +13,8 @@ function Entrar() {
   const { user, signInWithCode } = useAuth();
   const navigate = useNavigate();
   const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
+  const [needsPassword, setNeedsPassword] = useState(false);
   const [err, setErr] = useState("");
   const [busy, setBusy] = useState(false);
 
@@ -24,8 +26,15 @@ function Entrar() {
     e.preventDefault();
     setErr("");
     setBusy(true);
-    const { error } = await signInWithCode(code);
+    const { error } = await signInWithCode(code, needsPassword ? password : undefined);
     setBusy(false);
+
+    if (error === "NEEDS_PASSWORD") {
+      // Aluno já criou senha: pede a senha sem perder o código digitado.
+      setNeedsPassword(true);
+      setErr("");
+      return;
+    }
     if (error) setErr(error);
     else window.location.href = "/dashboard";
   }
@@ -54,11 +63,25 @@ function Entrar() {
             />
           </label>
 
+          {needsPassword ? (
+            <label className="block text-left">
+              <span className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Senha</span>
+              <input
+                required
+                autoFocus
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="mt-1.5 w-full border border-border bg-background px-3 py-3 text-sm outline-none transition focus:border-foreground"
+              />
+            </label>
+          ) : null}
+
           {err ? <div className="text-xs text-red-400">{err}</div> : null}
 
           <button
             type="submit"
-            disabled={busy || code.trim().length < 4}
+            disabled={busy || code.trim().length < 4 || (needsPassword && password.length < 6)}
             className="text-display w-full bg-primary px-6 py-3 text-sm text-primary-foreground transition hover:bg-primary/90 disabled:opacity-50"
           >
             {busy ? "Entrando…" : "Entrar"}
